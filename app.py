@@ -1,23 +1,16 @@
 
 import os
 import html
-import gradio as gr
 import cv2
+import gradio as gr
 import numpy as np
 
 
 # ============================================================
-# PLUTO — PROPULSION CHECK
-# Apple-inspired UI | OpenCV | Gradio
+# 1. STATUS AND GUIDANCE COMPONENTS
 # ============================================================
 
-
-# ------------------------------------------------------------
-# 1. RESULT COMPONENTS
-# ------------------------------------------------------------
-
-def status_card(title, description, state):
-
+def status_card(title, description, state="warning"):
     styles = {
         "success": {
             "color": "#16834A",
@@ -25,39 +18,40 @@ def status_card(title, description, state):
             "symbol": "✓"
         },
         "danger": {
-            "color": "#C93636",
-            "background": "#FCEEEE",
+            "color": "#D92D20",
+            "background": "#FDECEC",
             "symbol": "!"
         },
         "warning": {
-            "color": "#A66A13",
-            "background": "#FFF5E5",
+            "color": "#A66A00",
+            "background": "#FFF6E5",
             "symbol": "!"
         }
     }
 
     style = styles.get(state, styles["warning"])
 
-    return f"""
-    <div class="result-card">
-        <div class="result-label">VERIFICATION RESULT</div>
+    title = html.escape(str(title))
+    description = html.escape(str(description))
 
-        <div class="status-row">
-            <div class="status-icon"
-                 style="color:{style['color']};
-                        background:{style['background']}">
-                {style['symbol']}
+    return f"""
+    <div class="result-card"
+         style="background:{style['background']};
+                border-left:4px solid {style['color']};">
+
+        <div class="result-symbol"
+             style="color:{style['color']};">
+            {style['symbol']}
+        </div>
+
+        <div class="result-content">
+            <div class="result-title"
+                 style="color:{style['color']};">
+                {title}
             </div>
 
-            <div>
-                <div class="status-title"
-                     style="color:{style['color']}">
-                    {html.escape(title)}
-                </div>
-
-                <div class="status-description">
-                    {html.escape(description)}
-                </div>
+            <div class="result-description">
+                {description}
             </div>
         </div>
     </div>
@@ -65,137 +59,137 @@ def status_card(title, description, state):
 
 
 def guidance_card(title, description):
+    title = html.escape(str(title))
+    description = html.escape(str(description))
 
     return f"""
     <div class="guidance-card">
-
-        <div class="guidance-heading">
-            <span class="guidance-dot"></span>
-            CORRECTION &amp; GUIDANCE
-        </div>
-
-        <div class="guidance-title">
-            {html.escape(title)}
-        </div>
-
-        <div class="guidance-description">
-            {html.escape(description)}
-        </div>
-
+        <div class="guidance-heading">{title}</div>
+        <div class="guidance-description">{description}</div>
     </div>
     """
 
 
-# ------------------------------------------------------------
-# 2. VERIFICATION FUNCTION
-# ------------------------------------------------------------
+# ============================================================
+# 2. PROPULSION VERIFICATION FUNCTION
+# ============================================================
 
 def verify_installation(image):
 
+    # No image uploaded
     if image is None:
-
         return (
             None,
-
             status_card(
                 "UNABLE TO VERIFY",
-                "Please upload a drone image to begin.",
+                "Please upload a clear image of the Pluto drone.",
                 "warning"
             ),
-
             guidance_card(
                 "Image required",
-                "Upload a clear photograph of your Pluto drone."
+                "Upload a top or suitable angled view of the drone "
+                "to begin the verification process."
             )
         )
 
-    # Gradio supplies RGB images.
-    # OpenCV modules may expect BGR.
+    try:
+        # Gradio provides an RGB image as a NumPy array.
+        # Convert it to OpenCV's BGR format.
+        image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-    image_bgr = cv2.cvtColor(
-        image,
-        cv2.COLOR_RGB2BGR
-    )
+        # ----------------------------------------------------
+        # MEMBER 1: PROPELLER DETECTION
+        # ----------------------------------------------------
+        # detections = detect_propellers(image_bgr)
 
-    # ========================================================
-    # MEMBER 1 INTEGRATION
-    # ========================================================
-    #
-    # detections = detect_propellers(image_bgr)
-    #
-    # ========================================================
+        # ----------------------------------------------------
+        # MEMBER 2: REFERENCE CONFIGURATION
+        # ----------------------------------------------------
+        # reference = reference_configuration
+
+        # ----------------------------------------------------
+        # MEMBER 3: INSTALLATION VERIFICATION
+        # ----------------------------------------------------
+        # result = verify_propellers(detections, reference)
+
+        # ----------------------------------------------------
+        # TEMPORARY PLACEHOLDER
+        # ----------------------------------------------------
+        # Do not return PASS until the actual verification
+        # engine has been integrated and tested.
+
+        annotated_image = cv2.cvtColor(
+            image_bgr,
+            cv2.COLOR_BGR2RGB
+        )
+
+        return (
+            annotated_image,
+            status_card(
+                "UNABLE TO VERIFY",
+                "The verification engine is not connected yet.",
+                "warning"
+            ),
+            guidance_card(
+                "Verification engine pending",
+                "The image has been uploaded successfully. "
+                "Propeller detection and installation checks "
+                "will be available after integrating the "
+                "computer vision modules."
+            )
+        )
+
+    except Exception as error:
+
+        return (
+            None,
+            status_card(
+                "UNABLE TO VERIFY",
+                "An error occurred while processing the image.",
+                "danger"
+            ),
+            guidance_card(
+                "Processing error",
+                str(error)
+            )
+        )
 
 
-    # ========================================================
-    # MEMBER 2 INTEGRATION
-    # ========================================================
-    #
-    # reference = reference_configuration
-    #
-    # ========================================================
+# ============================================================
+# 3. CLEAR FUNCTION
+# ============================================================
 
-
-    # ========================================================
-    # MEMBER 3 INTEGRATION
-    # ========================================================
-    #
-    # verification = verify_propellers(
-    #     detections,
-    #     reference
-    # )
-    #
-    # status = verification["status"]
-    # instructions = verification["instructions"]
-    #
-    # ========================================================
-
-
-    # CURRENT PLACEHOLDER
-    # No actual detection or verification is performed.
-    # Never return PASS until the real modules are connected.
-
-    annotated_image = image.copy()
-
-    result = status_card(
-        "UNABLE TO VERIFY",
-        "The detection and verification engine is not connected yet.",
-        "warning"
-    )
-
-    instructions = guidance_card(
-        "Verification engine pending",
-        "Your image has been received. The propeller detection "
-        "and verification modules must be integrated before "
-        "an installation result can be established."
-    )
-
+def clear_all():
     return (
-        annotated_image,
-        result,
-        instructions
+        None,
+        None,
+        status_card(
+            "AWAITING IMAGE",
+            "Upload a drone image to begin verification.",
+            "warning"
+        ),
+        guidance_card(
+            "Ready for inspection",
+            "Ensure all four propellers are visible and "
+            "the drone motors are switched off."
+        )
     )
 
 
-# ------------------------------------------------------------
-# 3. CUSTOM CSS
-# ------------------------------------------------------------
+# ============================================================
+# 4. APPLE-INSPIRED INTERFACE DESIGN
+# ============================================================
 
 custom_css = """
 
-/* GLOBAL */
+/* Global appearance */
 
 .gradio-container {
     background: #F5F5F7 !important;
+    font-family: -apple-system, BlinkMacSystemFont,
+                 "Segoe UI", sans-serif !important;
     color: #1D1D1F !important;
-
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        system-ui,
-        sans-serif !important;
-
-    max-width: 1240px !important;
+    max-width: 1200px !important;
     margin: auto !important;
 }
 
@@ -203,540 +197,404 @@ body {
     background: #F5F5F7 !important;
 }
 
-footer {
-    display: none !important;
-}
+/* Header */
 
-
-/* HEADER */
-
-.top-header {
-    padding: 22px 0;
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 4px 20px 4px;
     border-bottom: 1px solid #E5E5E7;
-    margin-bottom: 48px;
+    margin-bottom: 35px;
 }
 
 .brand {
-    font-size: 20px;
-    font-weight: 750;
-    letter-spacing: -0.8px;
-    color: #171719;
-}
-
-.brand-subtitle {
-    font-size: 9px;
-    letter-spacing: 2px;
-    color: #85858B;
-    margin-top: 3px;
-    font-weight: 650;
-}
-
-.header-status {
-    font-size: 10px;
-    color: #16834A;
-    background: #EAF7EF;
-    border-radius: 30px;
-    padding: 9px 14px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-
-/* HERO */
-
-.hero {
-    text-align: center;
-    padding: 8px 10px 45px;
-}
-
-.eyebrow {
-    font-size: 10px;
-    letter-spacing: 2.5px;
-    font-weight: 700;
-    color: #77777D;
-    margin-bottom: 18px;
-}
-
-.hero h1 {
-    font-size: clamp(38px, 6vw, 66px);
-    line-height: 1.06;
-    letter-spacing: -3.5px;
-    font-weight: 750;
-    color: #171719;
-    margin: 0;
-}
-
-.hero h1 span {
-    color: #77777D;
-}
-
-.hero p {
-    max-width: 580px;
-    margin: 18px auto 0;
-    font-size: 15px;
-    line-height: 1.75;
-    color: #73737B;
-}
-
-
-/* SECTION LABELS */
-
-.section-label {
-    font-size: 10px;
-    letter-spacing: 1.7px;
-    font-weight: 750;
-    color: #77777D;
-    margin-bottom: 16px;
-}
-
-
-/* PANELS */
-
-.panel {
-    background: #FFFFFF;
-    border: 1px solid #E8E8EB;
-    border-radius: 19px;
-    padding: 22px;
-    box-shadow: 0 3px 15px rgba(0,0,0,0.025);
-    transition: border-color 0.2s ease;
-}
-
-.panel:hover {
-    border-color: #D1D1D6;
-}
-
-
-/* IMAGE */
-
-.image-panel img {
-    border-radius: 12px !important;
-}
-
-.upload-note {
-    font-size: 12px;
-    color: #898990;
-    line-height: 1.7;
-    margin-top: 10px;
-}
-
-
-/* BUTTON */
-
-.primary-button {
-    border-radius: 12px !important;
-    background: #0878E8 !important;
-    border: none !important;
-    min-height: 53px !important;
-    font-size: 14px !important;
-    font-weight: 650 !important;
-    color: white !important;
-
-    box-shadow:
-        0 3px 8px rgba(0,113,227,0.15);
-
-    transition: all 0.2s ease !important;
-}
-
-.primary-button:hover {
-    background: #0066CC !important;
-    transform: translateY(-1px);
-}
-
-
-/* RESULT CARD */
-
-.result-card {
-    background: white;
-    border: 1px solid #E8E8EB;
-    border-radius: 17px;
-    padding: 23px;
-    margin-top: 4px;
-}
-
-.result-label {
-    font-size: 10px;
-    letter-spacing: 1.8px;
-    font-weight: 750;
-    color: #85858B;
-    margin-bottom: 19px;
-}
-
-.status-row {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.status-icon {
-    min-width: 43px;
-    height: 43px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    font-weight: 750;
-}
-
-.status-title {
     font-size: 19px;
-    font-weight: 750;
+    font-weight: 700;
     letter-spacing: -0.5px;
 }
 
-.status-description {
-    color: #77777D;
+.brand span {
+    color: #0878E8;
+}
+
+.header-status {
+    font-size: 11px;
+    font-weight: 600;
+    color: #16834A;
+    letter-spacing: 1px;
+}
+
+/* Hero section */
+
+.hero {
+    text-align: center;
+    padding: 15px 10px 35px 10px;
+}
+
+.hero-label {
+    color: #0878E8;
     font-size: 12px;
-    line-height: 1.7;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+}
+
+.hero h1 {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -1.8px;
+    margin: 0 0 12px 0;
+    color: #1D1D1F;
+}
+
+.hero p {
+    font-size: 16px;
+    color: #6E6E73;
+    line-height: 1.6;
+    max-width: 650px;
+    margin: auto;
+}
+
+/* Main panels */
+
+.panel {
+    background: #FFFFFF !important;
+    border: 1px solid #E8E8ED !important;
+    border-radius: 20px !important;
+    padding: 22px !important;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.025);
+}
+
+.panel-heading {
+    font-size: 17px;
+    font-weight: 650;
+    margin-bottom: 5px;
+    color: #1D1D1F;
+}
+
+.panel-subheading {
+    color: #86868B;
+    font-size: 13px;
+    margin-bottom: 18px;
+}
+
+/* Image components */
+
+.image-frame {
+    border-radius: 14px !important;
+    overflow: hidden !important;
+}
+
+/* Buttons */
+
+.primary-button {
+    background: #0878E8 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    min-height: 48px !important;
+}
+
+.primary-button:hover {
+    background: #0067D1 !important;
+}
+
+.secondary-button {
+    border-radius: 12px !important;
+    min-height: 45px !important;
+    font-weight: 600 !important;
+}
+
+/* Results */
+
+.result-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 17px;
+    border-radius: 13px;
     margin-top: 5px;
 }
 
+.result-symbol {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+}
 
-/* GUIDANCE */
+.result-title {
+    font-size: 14px;
+    font-weight: 750;
+    letter-spacing: 0.4px;
+    margin-bottom: 5px;
+}
+
+.result-description {
+    color: #55555A;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Guidance */
 
 .guidance-card {
-    background: #FFFFFF;
-    border: 1px solid #E8E8EB;
-    border-radius: 17px;
-    padding: 23px;
-    margin-top: 14px;
+    background: #F5F5F7;
+    border-radius: 13px;
+    padding: 17px;
+    margin-top: 12px;
 }
 
 .guidance-heading {
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    font-weight: 750;
-    color: #77777D;
-
-    display: flex;
-    align-items: center;
-    gap: 9px;
-}
-
-.guidance-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #0878E8;
-}
-
-.guidance-title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
-    color: #222226;
-    margin-top: 18px;
+    margin-bottom: 7px;
+    color: #1D1D1F;
 }
 
 .guidance-description {
     font-size: 13px;
-    line-height: 1.7;
-    color: #77777D;
-    margin-top: 7px;
+    color: #6E6E73;
+    line-height: 1.6;
 }
 
-
-/* INFORMATION STRIP */
+/* Information strip */
 
 .info-strip {
-    background: #EDEDF0;
-    border-radius: 14px;
-    padding: 18px 20px;
-    margin-top: 25px;
-    color: #66666E;
-    font-size: 12px;
-    line-height: 1.8;
+    background: #EAF3FF;
+    border: 1px solid #D8E8FF;
+    padding: 17px 20px;
+    border-radius: 13px;
+    margin-top: 22px;
+    color: #315A85;
+    font-size: 13px;
+    line-height: 1.6;
 }
 
 .info-strip strong {
-    color: #333339;
+    color: #174F91;
 }
 
+/* Footer */
 
-/* FOOTER */
-
-.bottom-footer {
-    border-top: 1px solid #E3E3E6;
-    margin-top: 45px;
-    padding: 23px 0 35px;
-
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-
-    color: #909097;
-    font-size: 10px;
-    letter-spacing: 0.8px;
+.footer {
+    text-align: center;
+    padding: 30px 10px 20px 10px;
+    color: #86868B;
+    font-size: 11px;
+    line-height: 1.8;
 }
 
+.footer strong {
+    color: #515154;
+}
 
-/* MOBILE RESPONSIVENESS */
+/* Responsive */
 
-@media (max-width: 650px) {
-
+@media (max-width: 700px) {
     .hero h1 {
-        letter-spacing: -2px;
+        font-size: 32px;
     }
 
-    .top-header {
-        margin-bottom: 30px;
+    .hero p {
+        font-size: 14px;
+    }
+
+    .header {
+        padding: 18px 4px;
     }
 
     .panel {
-        padding: 15px;
-    }
-
-    .bottom-footer {
-        flex-direction: column;
-    }
-
-    .status-title {
-        font-size: 16px;
+        padding: 15px !important;
     }
 }
 
 """
 
 
-# ------------------------------------------------------------
-# 4. BUILD GRADIO INTERFACE
-# ------------------------------------------------------------
+# ============================================================
+# 5. GRADIO APPLICATION
+# ============================================================
 
-with gr.Blocks(
-    theme=gr.themes.Base(
-        primary_hue="blue",
-        neutral_hue="slate"
-    ),
-    css=custom_css,
-    title="PLUTO | Propeller Verification"
-) as app:
+with gr.Blocks() as demo:
 
-
-    # HEADER
-
+    # Header
     gr.HTML("""
-    <div class="top-header">
-
-        <div style="
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            flex-wrap:wrap;
-            gap:12px;
-        ">
-
-            <div>
-                <div class="brand">
-                    PLUTO<span style="color:#0878E8">.</span>
-                </div>
-
-                <div class="brand-subtitle">
-                    PROPULSION CHECK
-                </div>
-            </div>
-
-            <div class="header-status">
-                ● &nbsp; INTERFACE ONLINE
-            </div>
-
+    <div class="header">
+        <div class="brand">
+            PLUTO<span>.</span> / PROPULSION CHECK
         </div>
 
+        <div class="header-status">
+            ● INTERFACE ONLINE
+        </div>
     </div>
     """)
 
-
-    # HERO
-
+    # Hero
     gr.HTML("""
     <div class="hero">
-
-        <div class="eyebrow">
-            PRE-FLIGHT INSPECTION &nbsp; / &nbsp; 001
+        <div class="hero-label">
+            PRE-FLIGHT SAFETY SYSTEM
         </div>
 
-        <h1>
-            Ready before <span>takeoff.</span>
-        </h1>
+        <h1>Ready before takeoff.</h1>
 
         <p>
-            A smarter way to verify your Pluto drone's
-            propeller installation. Upload an image,
-            inspect the configuration and verify
-            before flight.
+            Verify your Pluto drone's propeller installation
+            before flight using computer vision.
+            Simple inspection. Safer takeoff.
         </p>
-
     </div>
     """)
 
-
-    # MAIN IMAGE INTERFACE
-
+    # Main application layout
     with gr.Row(equal_height=False):
 
-
-        # IMAGE INPUT
-
-        with gr.Column(
-            scale=1,
-            elem_classes=["panel"]
-        ):
+        # LEFT: Image upload
+        with gr.Column(scale=1, elem_classes=["panel"]):
 
             gr.HTML("""
-            <div class="section-label">
-                01 &nbsp; / &nbsp; IMAGE INPUT
+            <div class="panel-heading">
+                Drone image
+            </div>
+
+            <div class="panel-subheading">
+                Upload a clear image of your Pluto drone.
             </div>
             """)
 
             input_image = gr.Image(
-                label="Upload your Pluto drone",
+                label="Upload image",
                 type="numpy",
-                height=320,
                 sources=["upload"],
-                elem_classes=["image-panel"]
+                height=330,
+                elem_classes=["image-frame"]
             )
 
+            with gr.Row():
+                verify_button = gr.Button(
+                    "Verify installation",
+                    variant="primary",
+                    elem_classes=["primary-button"],
+                    scale=3
+                )
+
+                clear_button = gr.Button(
+                    "Clear",
+                    variant="secondary",
+                    elem_classes=["secondary-button"],
+                    scale=1
+                )
+
+        # RIGHT: Annotated output
+        with gr.Column(scale=1, elem_classes=["panel"]):
+
             gr.HTML("""
-            <div class="upload-note">
-                Upload a clear photograph showing
-                all four propellers and motor positions.
-                Supported formats: JPG, JPEG and PNG.
+            <div class="panel-heading">
+                Inspection output
             </div>
-            """)
 
-            verify_button = gr.Button(
-                "Verify installation  →",
-                variant="primary",
-                elem_classes=["primary-button"]
-            )
-
-            clear_button = gr.ClearButton(
-                components=[
-                    input_image,
-                    output_image
-                ],
-                value="Clear images"
-            )
-
-
-        # IMAGE OUTPUT
-
-        with gr.Column(
-            scale=1,
-            elem_classes=["panel"]
-        ):
-
-            gr.HTML("""
-            <div class="section-label">
-                02 &nbsp; / &nbsp; IMAGE ANALYSIS
+            <div class="panel-subheading">
+                Processed image and detected propeller positions.
             </div>
             """)
 
             output_image = gr.Image(
-                label="Inspection output",
+                label="Processed image",
                 type="numpy",
-                height=320,
+                height=330,
                 interactive=False,
-                elem_classes=["image-panel"]
+                elem_classes=["image-frame"]
             )
 
-            gr.HTML("""
-            <div class="upload-note">
-                Detection markers and incorrect motor
-                positions will appear here after
-                the verification engine is integrated.
-            </div>
-            """)
+    # Verification result
+    with gr.Column(elem_classes=["panel"]):
 
-
-    # VERIFICATION REPORT
-
-    gr.HTML("""
-    <div style="margin-top:35px">
-
-        <div class="section-label">
-            03 &nbsp; / &nbsp; VERIFICATION REPORT
+        gr.HTML("""
+        <div class="panel-heading">
+            Verification report
         </div>
 
-    </div>
-    """)
+        <div class="panel-subheading">
+            Installation status and inspection guidance.
+        </div>
+        """)
 
-    result_output = gr.HTML(
-        value=status_card(
-            "AWAITING IMAGE",
-            "Upload a drone image to begin inspection.",
-            "warning"
+        status_display = gr.HTML(
+            value=status_card(
+                "AWAITING IMAGE",
+                "Upload a drone image to begin verification.",
+                "warning"
+            )
         )
-    )
 
-
-    # CORRECTION GUIDANCE
-
-    guidance_output = gr.HTML(
-        value=guidance_card(
-            "Ready for inspection",
-            "Your correction instructions will appear here."
+        guidance_display = gr.HTML(
+            value=guidance_card(
+                "Ready for inspection",
+                "Ensure all four propellers are visible and "
+                "the drone motors are switched off."
+            )
         )
-    )
 
-
-    # SAFETY INFORMATION
-
+    # Safety information
     gr.HTML("""
     <div class="info-strip">
-
-        <strong>Inspection note</strong><br>
-
-        Ensure the drone is disarmed and all motors
-        are stopped before visual inspection.
-
-        Use a well-lit image showing the complete drone.
-
-        Uncertain results must never be treated as PASS.
-
+        <strong>Safety reminder:</strong>
+        Always keep the drone disarmed and its motors stopped
+        during inspection. If the image is unclear or the
+        installation cannot be confirmed, the system must not
+        report PASS.
     </div>
     """)
 
-
-    # FOOTER
-
+    # Footer
     gr.HTML("""
-    <div class="bottom-footer">
-
-        <div>PLUTO PROPULSION CHECK</div>
-
-        <div>COMPUTER VISION · OPENCV</div>
-
-        <div>PRE-FLIGHT SAFETY SYSTEM</div>
-
+    <div class="footer">
+        <strong>PLUTO PROPULSION CHECK</strong><br>
+        Computer Vision Based Propeller Installation Verification<br>
+        Synergy 2026
     </div>
     """)
 
-
-    # --------------------------------------------------------
-    # 5. BUTTON ACTIONS
-    # --------------------------------------------------------
-
+    # Button actions
     verify_button.click(
         fn=verify_installation,
-        inputs=input_image,
+        inputs=[input_image],
         outputs=[
             output_image,
-            result_output,
-            guidance_output
+            status_display,
+            guidance_display
+        ]
+    )
+
+    clear_button.click(
+        fn=clear_all,
+        inputs=[],
+        outputs=[
+            input_image,
+            output_image,
+            status_display,
+            guidance_display
         ]
     )
 
 
-# ------------------------------------------------------------
+# ============================================================
 # 6. LAUNCH APPLICATION
-# ------------------------------------------------------------
+# ============================================================
 
 if __name__ == "__main__":
 
-    port = int(os.environ.get("PORT", 10000))
-
-    app.queue().launch(
+    demo.queue().launch(
         server_name="0.0.0.0",
-        server_port=port,
-        share=False
+        server_port=int(os.environ.get("PORT", 10000)),
+        share=False,
+        theme=gr.themes.Base(
+            primary_hue="blue",
+            neutral_hue="slate"
+        ),
+        css=custom_css
     )
