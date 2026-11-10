@@ -1,0 +1,12 @@
+flowchart TD
+    A[RGB image from Gradio] --> B{Image valid?}
+    B -->|No| X[UNABLE TO VERIFY]
+    B -->|Yes| C[Assess sharpness and brightness]
+    C --> D{Quality acceptable?}
+    D -->|No| X
+    D -->|Yes| E[Resize image]
+    E --> F[CLAHE contrast enhancement]
+    F --> G[Gaussian denoising]
+    G --> H[Overlay reference P1-P4 annotations]
+    H --> I[Display image and quality report]
+    I --> X

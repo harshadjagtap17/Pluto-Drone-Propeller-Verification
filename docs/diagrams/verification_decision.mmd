@@ -1,0 +1,10 @@
+flowchart TD
+    A[Image and detections available] --> B{Image and required regions clear?}
+    B -->|No| U[UNABLE TO VERIFY]
+    B -->|Yes| C{Motor mapping and reference confirmed?}
+    C -->|No| U
+    C -->|Yes| D{Propeller type and orientation confidently identified?}
+    D -->|No| U
+    D -->|Yes| E{All positions match verified reference?}
+    E -->|Yes| P[PASS]
+    E -->|No| I[INCORRECT INSTALLATION]

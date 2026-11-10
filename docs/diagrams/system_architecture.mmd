@@ -1,0 +1,16 @@
+flowchart TB
+    U[User uploads Pluto drone image] --> UI[Gradio interface]
+    UI --> QA[Image quality assessment]
+    QA -->|Acceptable| PP[Image preprocessing]
+    QA -->|Unacceptable| UV[UNABLE TO VERIFY]
+    PP --> REF[Reference annotations P1-P4]
+    REF --> VIS[Annotated image visualization]
+    VIS --> UV
+    VIS -. Future integration .-> DET[Automatic motor / propeller detection]
+    DET -. Future integration .-> CLS[Propeller type and orientation analysis]
+    CFG[(Verified Pluto reference configuration)] -. Future integration .-> VER[Configuration comparison]
+    CLS -. Future integration .-> VER
+    VER --> DEC{Reliable comparison?}
+    DEC -->|Match| PASS[PASS]
+    DEC -->|Mismatch| INC[INCORRECT INSTALLATION]
+    DEC -->|Ambiguous| UV
