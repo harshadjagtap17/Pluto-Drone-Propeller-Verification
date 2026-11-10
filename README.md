@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="assets/images/banner.png" width="100%" alt="Pluto drone propeller verification project banner">
-</p>
+
 
 <h1 align="center">Pluto Drone Propeller Installation Verification</h1>
 
